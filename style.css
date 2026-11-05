@@ -1,0 +1,227 @@
+/* ===== Переменные (цвета и шрифты из макета Figma) ===== */
+:root {
+  --navy: #1b2d38;
+  --navy-dark: #04141f;
+  --green: #3d6e5f;
+  --text: #f3e9e4;
+  --gap: 64px;              /* одинаковое расстояние между коричневыми блоками */
+  --pad: 32px;              /* боковые отступы страницы */
+  --tile: 400px;            /* одинаковый размер квадратных картинок */
+  --font-head: "Jura", "Segoe UI", Arial, sans-serif;
+  --font-text: "Batang", "BatangChe", "바탕", "Noto Serif", Georgia, serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-text);
+  color: var(--text);
+  line-height: 1.6;
+  background: var(--navy-dark);
+}
+img { display: block; max-width: 100%; height: auto; }
+h1, h2, h3, .brand, nav a, footer { font-family: var(--font-head); }
+
+/* ===== Шапка: логотип + меню ===== */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding: 8px var(--pad);
+  background: var(--navy);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 2rem;
+  letter-spacing: .04em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* Логотип только на CSS: буква G с кистью. Размер меняется одной переменной --s (30-80 px).
+   Все размеры считаются в долях --u от исходного рисунка 380x380. */
+.logo {
+  --s: 56px;
+  --u: calc(var(--s) / 380);
+  --c-ring: #2f524c;
+  --c-leaf: #3f705f;
+  --c-stem: #8b6e63;
+  position: relative;
+  flex: none;
+  width: var(--s);
+  height: var(--s);
+  /* ручка кисти: прямоугольник + скруглённый низ */
+  background:
+    radial-gradient(circle at calc(var(--u) * 190) calc(var(--u) * 337),
+      var(--c-stem) calc(var(--u) * 18), transparent calc(var(--u) * 18.5)),
+    linear-gradient(var(--c-stem), var(--c-stem))
+      calc(var(--u) * 172) calc(var(--u) * 110) / calc(var(--u) * 36) calc(var(--u) * 227) no-repeat;
+}
+/* кольцо-«G»: кольцо, из которого вырезаны просветы, плюс перекладина и квадрат */
+.logo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--c-ring);
+  -webkit-mask-image:
+    linear-gradient(#000, #000),
+    linear-gradient(#000, #000),
+    conic-gradient(#0000 0 13.4deg, #000 0 57deg, #0000 0 92deg, #000 0 169.4deg, #0000 0 190.6deg, #000 0 349.4deg, #0000 0),
+    radial-gradient(circle closest-side, #0000 58.5%, #000 59%, #000 79%, #0000 79.5%);
+  mask-image:
+    linear-gradient(#000, #000),
+    linear-gradient(#000, #000),
+    conic-gradient(#0000 0 13.4deg, #000 0 57deg, #0000 0 92deg, #000 0 169.4deg, #0000 0 190.6deg, #000 0 349.4deg, #0000 0),
+    radial-gradient(circle closest-side, #0000 58.5%, #000 59%, #000 79%, #0000 79.5%);
+  -webkit-mask-position:
+    calc(var(--u) * 124) calc(var(--u) * 167),
+    calc(var(--u) * 222) calc(var(--u) * 165), 0 0, 0 0;
+  mask-position:
+    calc(var(--u) * 124) calc(var(--u) * 167),
+    calc(var(--u) * 222) calc(var(--u) * 165), 0 0, 0 0;
+  -webkit-mask-size:
+    calc(var(--u) * 32) calc(var(--u) * 32),
+    calc(var(--u) * 117) calc(var(--u) * 35), 100% 100%, 100% 100%;
+  mask-size:
+    calc(var(--u) * 32) calc(var(--u) * 32),
+    calc(var(--u) * 117) calc(var(--u) * 35), 100% 100%, 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-over, source-over, source-in, source-over;
+  mask-composite: add, add, intersect, add;
+}
+/* «капля» на кончике кисти */
+.logo::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--u) * 160);
+  top: calc(var(--u) * 45);
+  width: calc(var(--u) * 60);
+  height: calc(var(--u) * 60);
+  background: var(--c-leaf);
+  border-radius: 0 50% 50% 50%;
+  transform: scaleY(1.49) rotate(45deg);
+}
+
+.site-header nav ul {
+  display: flex;
+  gap: 40px;
+  margin: 0; padding: 0;
+  list-style: none;
+}
+.site-header nav a {
+  color: #cfd8d4;
+  text-decoration: none;
+  font-size: 1.05rem;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.site-header nav a:hover,
+.site-header nav a.active { color: #fff; border-color: #5fa58f; }
+
+/* ===== Основная часть ===== */
+main {
+  flex: 1;
+  background: linear-gradient(180deg, var(--green) 0, #1a3d3a 45%, var(--navy-dark) 100%);
+}
+.hero {
+  display: flex;
+  align-items: center;
+  min-height: 150px;
+  padding: 24px var(--pad);
+  background: var(--green);
+}
+.hero h1, .content > h1 { margin: 0; font-size: 1.8rem; font-weight: 400; }
+
+/* Общий блок для остальных страниц (index, anim, quiz) */
+.content {
+  margin: var(--gap) var(--pad);
+  padding: 24px var(--pad);
+  background: #7a5a52;
+}
+.quiz .block, .quiz .btn { color: #222; }
+
+/* ===== Страница «Про меня»: блоки работ ===== */
+.work {
+  padding: 40px var(--pad);
+  background: var(--bg);
+}
+.work + .work { margin-top: var(--gap); }
+.work:first-of-type { margin-top: 0; }
+.work:nth-of-type(1) { --bg: #8b6e63; }
+.work:nth-of-type(2) { --bg: #7a5a52; }
+.work:nth-of-type(3) { --bg: #5e3f38; }
+.work:nth-of-type(4) { --bg: #3d2620; }
+.work:nth-of-type(5) { --bg: #2a1510; }
+.about-end { height: var(--gap); }
+
+.work__text p { margin: 0 0 .6em; }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* Вариант «текст сверху, картинки ниже» */
+.work--top { display: flex; flex-direction: column; gap: 24px; }
+.work--top .work__media {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, var(--tile)));
+  justify-content: end;
+  gap: 4px;
+  width: 100%;
+}
+.work__media img { width: 100%; }
+.work--top .work__media img { aspect-ratio: 1 / 1; object-fit: cover; }
+
+/* Вариант «текст слева, картинки справа» */
+.work--side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: 32px;
+  align-items: start;
+}
+.work--grid .work__media {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, var(--tile)));
+  justify-content: end;
+  gap: 4px;
+}
+.work--grid .work__media img { aspect-ratio: 1 / 1; object-fit: cover; }
+.work--single .work__media { justify-self: end; width: 100%; max-width: var(--img-w, 100%); }
+.work--single:not(.work--small) { --img-w: 380px; }   /* ширина картинки в блоке 4 */
+.work--small { grid-template-columns: minmax(0, 1fr) 180px; }
+.work--small .work__media { width: 180px; }
+
+/* ===== Подвал ===== */
+footer {
+  padding: 16px var(--pad);
+  background: var(--navy);
+  text-align: right;
+  font-size: 1.5rem;
+}
+
+/* ===== Планшет и телефон ===== */
+@media (max-width: 800px) {
+  :root { --gap: 40px; --pad: 20px; }
+  .site-header { flex-direction: column; align-items: flex-start; padding-bottom: 16px; }
+  .brand { font-size: 2.2rem; }
+  .site-header nav ul { flex-direction: column; gap: 8px; }
+  .site-header nav a { font-size: 1.5rem; }
+  .hero { min-height: 90px; }
+  .hero h1, .content > h1 { font-size: 1.35rem; }
+  .work { padding: 28px var(--pad); }
+  .work--side, .work--small { display: flex; flex-direction: column; gap: 20px; }
+  .work--top .work__media { grid-template-columns: 1fr; justify-content: stretch; max-width: 360px; margin: 0 auto; gap: 8px; }
+  .work--grid .work__media { grid-template-columns: 1fr; justify-content: stretch; max-width: 360px; margin: 0 auto; gap: 8px; }
+  .work--single .work__media { max-width: 360px; margin: 0 auto; }
+  .work--small .work__media { width: 160px; margin: 0 auto; }
+  footer { text-align: center; font-size: 1.3rem; }
+}
