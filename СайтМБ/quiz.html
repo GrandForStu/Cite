@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тест — Мой сайт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jura:wght@400;600&family=Noto+Serif&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/quiz.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="index.html">Мой Сайт<span class="logo" aria-hidden="true"></span></a>
+  <nav aria-label="Основное меню">
+    <ul>
+      <li><a href="index.html">Главная</a></li>
+      <li><a href="anim.html">Анимация</a></li>
+      <li><a href="quiz.html" class="active">Тест</a></li>
+      <li><a href="about.html">Про меня</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <div class="content">
+    <h1>Тест: молодёжный слэнг</h1>
+    <p>Нажмите на вопрос, чтобы открыть варианты ответа. Пока вы не ответили, другие вопросы недоступны.</p>
+
+    <div class="quiz">
+
+      <section id="status" class="status" hidden>
+        <h3>Вопросы закончились</h3>
+        <p id="score"></p>
+        <p>Нажмите на любой вопрос, чтобы увидеть правильный ответ.</p>
+        <button id="restart" class="btn" type="button">Пройти заново</button>
+      </section>
+
+      <div id="quiz-area" class="quiz-area"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 Мой сайт
+</footer>
+
+<script>
+const QUESTIONS = [
+  {
+    q: 'А когда с человеком может произойти дрожемент?',
+    answers: [
+      { t: 'Когда он влюбляется' },
+      { t: 'Когда он идет шопиться' },
+      { t: 'Когда он слышит смешную шутку' },
+      { t: 'Когда он боится, пугается', ok: true,
+        e: 'Лексема «дрожемент» имплицирует состояние крайнего напряжения и страха: «У меня всегда дрожемент в ногах, когда копы подходят».' }
+    ]
+  },
+  {
+    q: 'Говорят, Антон заовнил всех. Это еще как понимать?',
+    answers: [
+      { t: 'Как так, заовнил? Ну и хамло. Кто с ним теперь дружить-то будет?' },
+      { t: 'Антон очень надоедливый и въедливый человек, всех задолбал' },
+      { t: 'Молодец, Антон, всех победил!', ok: true,
+        e: 'Термин «заовнить» заимствован из английского языка, он происходит от слова own и переводится как «победить», «завладеть», «получить».' },
+      { t: 'Нет ничего плохого в том, что Антон тщательно выбирает себе друзей' }
+    ]
+  },
+  {
+    q: 'А фразу «заскамить мамонта» как понимать?',
+    answers: [
+      { t: 'Разозлить кого-то из родителей' },
+      { t: 'Увлекаться археологией' },
+      { t: 'Развести недотепу на деньги', ok: true,
+        e: 'Заскамить мамонта — значит обмануть или развести на деньги. Почему мамонта? Потому что мошенники часто выбирают в жертвы пожилых людей (древних, как мамонты), которых легко обвести вокруг пальца.' },
+      { t: 'Оскорбить пожилого человека' }
+    ]
+  },
+  {
+    q: 'Кто такие бефефе?',
+    answers: [
+      { t: 'Вши?' },
+      { t: 'Милые котики, такие милые, что бефефе' },
+      { t: 'Лучшие друзья', ok: true,
+        e: 'Бефефе — это лучшие друзья. Этакая аббревиатура от английского выражения best friends forever.' },
+      { t: 'Люди, которые не держат слово' }
+    ]
+  },
+  {
+    q: 'Что из перечисленного можно назвать <b>крашем</b>, если ты <b>чиллишь</b> в компании и вдруг <b>залипаешь</b> на кого-то?',
+    answers: [
+      { t: 'Человек, который тебе очень нравится и вызывает симпатию.', ok: true,
+        e: '«Краш» — это объект симпатии; «чиллить» — расслабляться, отдыхать; «залипать» — засматриваться или задумываться.' },
+      { t: 'Тот, на кого приятно смотреть и хочется общаться.', ok: true,
+        e: '«Краш» — это объект симпатии; «чиллить» — расслабляться, отдыхать; «залипать» — засматриваться или задумываться.' },
+      { t: 'Твоя сильно накрашенная подруга, которая переоценила свой макияж.' },
+      { t: 'Трэш в более мягкой интерпретации.' }
+    ]
+  }
+];
+
+const DELAY_WRONG = 2000;
+const DELAY_OK    = 3000;
+const STEP        = 200;
+const SLIDE       = 900;
+const area      = document.getElementById('quiz-area');
+const statusBox = document.getElementById('status');
+const scoreEl   = document.getElementById('score');
+
+let items, active, answered, score, finished;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function start() {
+  area.innerHTML = '';
+  statusBox.hidden = true;
+  active = null; answered = 0; score = 0; finished = false;
+
+  items = shuffle(QUESTIONS).map((q, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'q-item';
+    const el = document.createElement('div');
+    el.className = 'block question';
+    el.innerHTML = `<span class="q-num">${i + 1}</span><span class="q-text">${q.q}</span>`;
+    wrap.append(el);
+    area.append(wrap);
+
+    const item = { q, wrap, el, done: false, review: null };
+    el.addEventListener('click', () => onQuestion(item));
+    return item;
+  });
+  refresh();
+}
+
+function refresh() {
+  items.forEach(it => {
+    const available = finished || (!active && !it.done);
+    it.el.classList.toggle('off', !available);
+  });
+}
+
+function onQuestion(item) {
+  if (item.el.classList.contains('off')) return;
+  finished ? toggleReview(item) : openQuestion(item);
+}
+
+function openQuestion(item) {
+  active = item;
+  item.el.classList.add('is-open');
+  refresh();
+
+  const row = document.createElement('div');
+  row.className = 'answers';
+  shuffle(item.q.answers).forEach(a => {
+    const b = document.createElement('div');
+    b.className = 'block answer';
+    b.textContent = a.t;
+    b.addEventListener('click', () => pick(item, row, b, a));
+    row.append(b);
+  });
+  item.wrap.append(row);
+}
+
+function pick(item, row, block, ans) {
+  if (row.classList.contains('locked')) return;
+  row.classList.add('locked');
+  block.classList.add('picked', ans.ok ? 'is-correct' : 'is-wrong');
+
+  if (ans.ok) {
+    score++;
+    const exp = document.createElement('div');
+    exp.className = 'explain';
+    exp.textContent = ans.e;
+    block.append(exp);
+  }
+  setTimeout(() => leave(item, row, block, !!ans.ok), ans.ok ? DELAY_OK : DELAY_WRONG);
+}
+
+function leave(item, row, picked, ok) {
+  const marker = document.createElement('span');
+  marker.className = 'marker ' + (ok ? 'ok' : 'bad');
+  marker.textContent = ok ? '✔' : 'X';
+  item.el.append(marker);
+
+  const movers = [...row.children].filter(b => !(ok && b === picked)).reverse();
+  movers.forEach((b, i) => {
+    b.style.setProperty('--d', i * STEP + 'ms');
+    b.classList.add('out');
+  });
+  const slideEnd = Math.max(movers.length - 1, 0) * STEP + SLIDE;
+  let total = slideEnd;
+  if (ok) {
+    picked.style.setProperty('--d', slideEnd + 'ms');
+    picked.classList.add('vanish');
+    total += 500;
+  }
+
+  setTimeout(() => {
+    row.style.height = row.offsetHeight + 'px';
+    row.offsetHeight;
+    row.classList.add('collapse');
+    setTimeout(() => {
+      row.remove();
+      item.el.classList.remove('is-open');
+      item.done = true;
+      active = null;
+      answered++;
+      refresh();
+      if (answered === items.length) finish();
+    }, 450);
+  }, total + 100);
+}
+
+function finish() {
+  finished = true;
+  scoreEl.textContent = `Правильных ответов: ${score} из ${items.length}`;
+  statusBox.hidden = false;
+  statusBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  refresh();
+}
+
+function toggleReview(item) {
+  const hadReview = item.review;
+  items.forEach(it => { if (it.review) { it.review.remove(); it.review = null; } });
+  if (hadReview) return;
+
+  const right = item.q.answers.filter(a => a.ok);
+  const box = document.createElement('div');
+  box.className = 'review';
+  box.innerHTML = `<p><b>${right.length > 1 ? 'Правильные ответы' : 'Правильный ответ'}</b></p>`
+    + right.map(a => `<p class="r-ans">✔ ${a.t}</p>`).join('')
+    + [...new Set(right.map(a => a.e))].map(e => `<p>${e}</p>`).join('');
+  item.wrap.append(box);
+  item.review = box;
+}
+
+document.getElementById('restart').addEventListener('click', start);
+start();
+</script>
+</body>
+</html>
